@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "accesslint": {
+      "command": "npx",
+      "args": ["-y", "@accesslint/mcp@0.10.3"]
+    }
+  }
+}

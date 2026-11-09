@@ -1,0 +1,137 @@
+openapi: 3.1.0
+info:
+  title: "{{PROJECT_NAME}} API"
+  description: "Contrato OpenAPI 3.1 Contract-First — Single Source of Truth do ecossistema {{PROJECT_NAME}}."
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:5000/api/v1"
+    description: "Ambiente de Desenvolvimento Local"
+
+paths:
+  /system/status:
+    get:
+      summary: "Status do Sistema & Dependências"
+      description: "Retorna a integridade dos serviços internos (bancos, cache, armazenamento e IA se houver)."
+      operationId: "getSystemStatus"
+      tags:
+        - "Sistema"
+      responses:
+        '200':
+          description: "Status operacional retornado com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStatusResponse"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+
+  /auth/login:
+    post:
+      summary: "Autenticação de Usuário"
+      description: "Valida credenciais e emite token JWT ou sinalização de onboarding MFA obrigatório."
+      operationId: "login"
+      tags:
+        - "Autenticação"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        '200':
+          description: "Autenticação concluída."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokenResponse"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+
+components:
+  schemas:
+    SystemStatusResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          example: "Healthy"
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+          example: "1.0.0"
+        details:
+          type: object
+          additionalProperties:
+            type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          example: "P@ssword123!"
+
+    AuthTokenResponse:
+      type: object
+      required:
+        - token
+        - expiresIn
+      properties:
+        token:
+          type: string
+          description: "Token JWT de acesso."
+        expiresIn:
+          type: integer
+          description: "Tempo de expiração em segundos."
+        requiresMfaSetup:
+          type: boolean
+          description: "Indica se o usuário deve realizar o setup de MFA TOTP."
+
+    ProblemDetails:
+      type: object
+      description: "Padrão de Erro RFC 7807 / RFC 9457"
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+
+  responses:
+    UnauthorizedError:
+      description: "Credenciais inválidas ou acesso não autenticado."
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+
+    InternalServerError:
+      description: "Erro interno do servidor."
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"

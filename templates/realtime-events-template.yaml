@@ -1,0 +1,60 @@
+# Contrato de Eventos em Tempo Real (SignalR / WebSocket)
+# Versão: 1.0.0
+# Escopo: Hubs bidirecionais de streaming e progresso
+
+hub:
+  name: "{{PROJECT_NAME}}Hub"
+  endpoint: "/hubs/progress"
+  protocol: "SignalR Core / WebSocket"
+
+serverToClientEvents:
+  - name: "OnProgressChanged"
+    description: "Notifica o cliente sobre o avanço percentual e etapa de uma tarefa assíncrona."
+    payload:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        stage:
+          type: string
+          example: "Processing"
+        percent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        message:
+          type: string
+          example: "Etapa 2 concluída com sucesso."
+
+  - name: "OnJobCompleted"
+    description: "Notifica a finalização com sucesso da tarefa."
+    payload:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        resultUrl:
+          type: string
+          format: uri
+
+  - name: "OnJobFailed"
+    description: "Notifica a falha na execução."
+    payload:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+
+clientToServerMethods:
+  - name: "SubscribeToJob"
+    arguments:
+      - name: "jobId"
+        type: string
+    description: "Registra a conexão do cliente no grupo do Job especificado."

@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+*.log
+scratch/
+dist/
+.playwright-mcp/
+playwright-audit/
+
+# Credenciais e segredos (OWASP D06)
+*-service-account*.json
+*-credentials*.json
+*.key
+*.pem

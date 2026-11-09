@@ -1,0 +1,124 @@
+{
+    "$schema":  "https://antigravity.google/schemas/permissions-v1.json",
+    "project":  "{{PROJECT_NAME}}",
+    "language":  "pt-BR",
+    "autonomousMode":  {
+                           "enabled":  true,
+                           "executionPolicy":  "turbo",
+                           "interactivePrompts":  false,
+                           "autoApproveAllCommands":  false,
+                           "autoApproveFileEdits":  true
+                       },
+    "cli":  {
+                "enabled":  true,
+                "agentMode":  "auto",
+                "executionPolicy":  "turbo",
+                "interactivePrompts":  false,
+                "autoApproveAllCommands":  false,
+                "autoApproveFileEdits":  true,
+                "trustedWorkspace":  true
+            },
+    "allowedCommands":  [
+                            "dotnet",
+                            "ng",
+                            "npm",
+                            "npx",
+                            "docker",
+                            "docker compose",
+                            "git",
+                            "python",
+                            "node",
+                            "pwsh",
+                            "powershell",
+                            "cmd",
+                            "bash",
+                            "Get-ChildItem",
+                            "Select-Object",
+                            "Get-Content",
+                            "Test-Path",
+                            "Copy-Item",
+                            "Remove-Item",
+                            "New-Item",
+                            "Move-Item",
+                            "icacls",
+                            "whoami"
+                        ],
+    "forbiddenCommands":  [
+                              "rmdir /s /q /",
+                              "format *",
+                              "drop database*",
+                              "git push --force*",
+                              "curl * | bash",
+                              "curl * | sh",
+                              "Invoke-Expression *http*",
+                              "iex *http*"
+                          ],
+    "modelRouting":  {
+                         "specifyAndPlan":  [
+                                                "Argon",
+                                                "Opus 5.5"
+                                            ],
+                         "tasksAndExecute":  [
+                                                 "Gemini 3.8 Flash",
+                                                 "Sonnet 5.5"
+                                             ],
+                         "validateAndQa":  [
+                                               "Sonnet 5.5"
+                                           ],
+                         "uiUxEngineering":  [
+                                                 "pro",
+                                                 "Sonnet 5.5"
+                                             ]
+                     },
+    "selfHealingHooks":  {
+                             "{{PROJECT_SLUG}}-backend-dotnet":  {
+                                                                     "onTaskComplete":  [
+                                                                                            "dotnet build --warnaserror",
+                                                                                            "dotnet test --no-build"
+                                                                                        ],
+                                                                     "onFailureDelegateTo":  "agente-executor-dotnet",
+                                                                     "onSuccessDelegateTo":  "agente-validador-qa",
+                                                                     "maxRetries":  3,
+                                                                     "timeoutSeconds":  300
+                                                                 },
+                             "{{PROJECT_SLUG}}-frontend-angular":  {
+                                                                       "onTaskComplete":  [
+                                                                                              "npm run build",
+                                                                                              "npm run test -- --watch=false"
+                                                                                          ],
+                                                                       "onFailureDelegateTo":  "agente-executor-angular",
+                                                                       "onSuccessDelegateTo":  "agente-validador-qa",
+                                                                       "maxRetries":  3,
+                                                                       "timeoutSeconds":  300
+                                                                   }
+                         },
+    "securityGuardrails":  {
+                               "readOnlyPaths":  [
+                                                     "data/input/**"
+                                                 ],
+                               "writableOutputPaths":  [
+                                                           "data/output/**"
+                                                       ],
+                               "forbiddenGitPatterns":  [
+                                                            ".env",
+                                                            "data/input/**"
+                                                        ],
+                               "forbidAutomaticRemotePush":  true
+                           },
+    "owaspLlmCompliance":  {
+                               "enabled":  true,
+                               "standard":  "OWASP Top 10 for LLM Applications (2025)",
+                               "rules":  {
+                                             "LLM01_PromptInjection":  "Enforce strict XML delimiters (\u003cuntrusted_content\u003e) for all external text (OCR, uploads, user prompts). Prohibit command interpretation within data boundaries.",
+                                             "LLM02_SensitiveInformationDisclosure":  "Block extraction of .env, tokens, credentials, and PII from prompts and logs.",
+                                             "LLM03_SupplyChainVulnerabilities":  "Lock third-party package tags to explicit versions; avoid unpinned \u0027@latest\u0027 in tool executions.",
+                                             "LLM04_DataAndModelPoisoning":  "Require human validation before persisting generated content to any vector memory or knowledge base.",
+                                             "LLM05_ImproperOutputHandling":  "Sanitize and validate model outputs prior to shell execution, HTML rendering, or DB queries.",
+                                             "LLM06_ExcessiveAgency":  "Principle of Least Privilege: removed wildcard allowedCommands (\u0027*\u0027), blocked high-risk destructive commands.",
+                                             "LLM07_SystemPromptLeakage":  "Explicit instructions prohibiting disclosure of system instructions, internal schemas, and security guardrails.",
+                                             "LLM08_VectorAndEmbeddingWeaknesses":  "Thresholded similarity search with deterministic overrides preventing context hijacking (if a vector store is used).",
+                                             "LLM09_Misinformation":  "Mandatory quality gates (dotnet test, npm test, visual QA) before artifact approval.",
+                                             "LLM10_UnboundedConsumption":  "Self-healing loops bounded by maxRetries (3) and execution timeout (300s) to prevent runaway costs/loops."
+                                         }
+                           }
+}

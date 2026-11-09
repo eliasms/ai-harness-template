@@ -1,0 +1,35 @@
+# ====================================================================
+# {{PROJECT_NAME}} — Workspace Meta-Repository .gitignore
+# ====================================================================
+
+# 1. Segredos e Ambiente
+.env
+.env.*
+!.env.example
+
+# 2. Junction local dos agentes (versionados em {{PROJECT_SLUG}}-spec-hub/.agents)
+/.agents
+
+# 3. Dados de entrada/saída (imutáveis / gerados)
+data/input/*
+data/output/*
+!data/input/.gitkeep
+!data/output/.gitkeep
+
+# 4. Logs e temporários
+.logs/
+*.log
+scratch/
+*.tmp
+
+# 5. Sistema operacional e IDEs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# 6. Os repositórios abaixo são submódulos/clones independentes
+# (remova estas linhas se preferir monorepo)
+{{PROJECT_SLUG}}-backend-dotnet/
+{{PROJECT_SLUG}}-frontend-angular/
+{{PROJECT_SLUG}}-infra-containers/
